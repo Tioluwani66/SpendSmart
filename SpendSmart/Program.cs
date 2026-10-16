@@ -13,7 +13,7 @@ namespace SpendSmart
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddDbContext<SpendSmartDbContext>(options =>
-                options.UseInMemoryDatabase("SpendSmartDb")
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
             var app = builder.Build();

@@ -22,8 +22,8 @@ namespace SpendSmart.Controllers
         }
 
         public IActionResult Expenses()
-        { 
-            var allExpenses = _context.Expenses.ToList();
+        {
+            var allExpenses = _context.Expenses.OrderBy(x => x.Id).ToList();
 
             var totalExpenses = allExpenses.Sum(x => x.Value);
 
