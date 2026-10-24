@@ -1,22 +1,87 @@
-html {
-  font-size: 14px;
+/* =========================================================
+   SpendSmart Global Dark + Orange Theme
+   ========================================================= */
+
+/* Set Bootstrap CSS variables for Primary Orange */
+:root {
+    --bs-primary: #fd7e14;
+    --bs-primary-rgb: 253, 126, 20;
+    --bs-link-color: #fd7e14;
+    --bs-link-hover-color: #ff922b;
 }
 
-@media (min-width: 768px) {
-  html {
+/* General Body & Sticky Footer Layout Fix */
+html {
     font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    background-color: #121212 !important;
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Ensures footer is always pushed below content */
+/* Force footer back into normal page flow so long lists push it down */
+.footer {
+    position: static !important;
+    bottom: auto !important;
+    width: 100% !important;
+    margin-top: 3rem !important;
+    padding: 1rem 0 !important;
+    background-color: #1e1e1e !important;
+    border-top: 1px solid #333 !important;
+}
+
+/* Make all standard text links Orange */
+a {
+    color: #fd7e14;
+    transition: color 0.2s ease-in-out;
+}
+
+    a:hover {
+        color: #ff922b;
+    }
+
+/* Override .text-primary to Orange */
+.text-primary {
+    color: #fd7e14 !important;
+}
+
+/* Primary Buttons (Overview, Save, Add, etc.) -> Orange */
+.btn-primary {
+    background-color: #fd7e14 !important;
+    border-color: #fd7e14 !important;
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+    .btn-primary:hover,
+    .btn-primary:focus,
+    .btn-primary:active {
+        background-color: #e8590c !important;
+        border-color: #e8590c !important;
+        color: #ffffff !important;
+    }
+
+/* Form inputs styling for dark theme */
+.form-control {
+    background-color: #2a2a2a !important;
+    border: 1px solid #444 !important;
+    color: #fff !important;
+}
+
+    .form-control:focus {
+        background-color: #2a2a2a !important;
+        border-color: #fd7e14 !important;
+        box-shadow: 0 0 0 0.25rem rgba(253, 126, 20, 0.25) !important;
+    }
+
+/* Table styling for Expenses page */
+.table {
+    color: #e0e0e0 !important;
 }

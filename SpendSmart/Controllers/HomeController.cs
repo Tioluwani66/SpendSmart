@@ -7,7 +7,6 @@ namespace SpendSmart.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
         private readonly SpendSmartDbContext _context;
 
         public HomeController(ILogger<HomeController> logger, SpendSmartDbContext context)
@@ -31,37 +30,54 @@ namespace SpendSmart.Controllers
 
             return View(allExpenses);
         }
+
         public IActionResult CreateEditExpense(int? id)
         {
             if (id != null)
             {
-                //editing -> load an expense by id
+                // Editing -> load an expense by id
                 var expenseInDb = _context.Expenses.SingleOrDefault(expense => expense.Id == id);
                 return View(expenseInDb);
             }
 
-            return View();
+            // Creating new -> initialize with today's date
+            var newExpense = new Expense
+            {
+                Date = DateTime.Today
+            };
+
+            return View(newExpense);
         }
+
         public IActionResult DeleteExpense(int id)
         {
             var expenseInDb = _context.Expenses.SingleOrDefault(expense => expense.Id == id);
-            _context.Expenses.Remove(expenseInDb); 
-            _context.SaveChanges();
+
+            if (expenseInDb != null)
+            {
+                _context.Expenses.Remove(expenseInDb);
+                _context.SaveChanges();
+            }
+
             return RedirectToAction("Expenses");
         }
 
         public IActionResult CreateEditExpenseForm(Expense model)
-        { 
-            if(model.Id == 0)
+        {
+            if (model.Id == 0)
             {
-                // Create
+                // AUTOMATICALLY captures current exact date, hour, minute, second
+                model.Date = DateTime.UtcNow;
                 _context.Expenses.Add(model);
-            }else
+            }
+            else
             {
+                // Preserve date as UTC when updating
+                model.Date = DateTime.SpecifyKind(model.Date, DateTimeKind.Utc);
                 _context.Expenses.Update(model);
             }
 
-            _context. SaveChanges();
+            _context.SaveChanges();
 
             return RedirectToAction("Expenses");
         }
