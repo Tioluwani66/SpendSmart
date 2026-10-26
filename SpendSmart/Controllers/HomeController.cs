@@ -62,18 +62,26 @@ namespace SpendSmart.Controllers
             return RedirectToAction("Expenses");
         }
 
+        [HttpPost]
         public IActionResult CreateEditExpenseForm(Expense model)
         {
+            // SAFETY CHECK: If description is empty or value is 0 or less, reload form instead of crashing
+            if (string.IsNullOrWhiteSpace(model.Description) || model.Value <= 0)
+            {
+                return View("CreateEditExpense", model);
+            }
+
+            // Convert Date to UTC for PostgreSQL
+            model.Date = DateTime.SpecifyKind(model.Date, DateTimeKind.Utc);
+
             if (model.Id == 0)
             {
-                // AUTOMATICALLY captures current exact date, hour, minute, second
-                model.Date = DateTime.UtcNow;
+                // Create
                 _context.Expenses.Add(model);
             }
             else
             {
-                // Preserve date as UTC when updating
-                model.Date = DateTime.SpecifyKind(model.Date, DateTimeKind.Utc);
+                // Edit
                 _context.Expenses.Update(model);
             }
 
