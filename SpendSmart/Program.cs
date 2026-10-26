@@ -26,7 +26,11 @@ namespace SpendSmart
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            // COMMENTED OUT FOR RENDER COMPATIBILITY: 
+            // Render handles SSL/HTTPS at the proxy level. Leaving this on inside 
+            // Docker containers causes "Failed to determine https port" warnings and crashes.
+            // app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
             app.UseRouting();
