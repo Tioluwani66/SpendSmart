@@ -15,7 +15,13 @@
     <input type="hidden" asp-for="Date" />
 
     <label class="mt-4">Value ₦</label>
-    <input class="form-control" type="number" placeholder="0" asp-for="Value" step="0.01" />
+    <!-- FIX: Clears the default 0 for new expenses while preserving the value when editing -->
+    <input class="form-control"
+           type="number"
+           step="0.01"
+           placeholder="Enter amount"
+           asp-for="Value"
+           value="@(Model?.Id == 0 ? "" : Model?.Value.ToString())" />
 
     <label class="mt-4">Description</label>
     <input class="form-control" type="text" placeholder="Add a description" asp-for="Description" />
