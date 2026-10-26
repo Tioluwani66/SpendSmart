@@ -40,10 +40,10 @@ namespace SpendSmart.Controllers
                 return View(expenseInDb);
             }
 
-            // Creating new -> initialize with today's date
+            // FIXED: Use DateTime.UtcNow instead of DateTime.Today so hours/minutes/seconds are preserved
             var newExpense = new Expense
             {
-                Date = DateTime.Today
+                Date = DateTime.UtcNow
             };
 
             return View(newExpense);
@@ -71,17 +71,16 @@ namespace SpendSmart.Controllers
                 return View("CreateEditExpense", model);
             }
 
-            // Convert Date to UTC for PostgreSQL
-            model.Date = DateTime.SpecifyKind(model.Date, DateTimeKind.Utc);
-
             if (model.Id == 0)
             {
-                // Create
+                // FIXED: Automatically stamp the exact current UTC time at the moment of submission
+                model.Date = DateTime.UtcNow;
                 _context.Expenses.Add(model);
             }
             else
             {
-                // Edit
+                // Edit: Preserve existing date as UTC for PostgreSQL
+                model.Date = DateTime.SpecifyKind(model.Date, DateTimeKind.Utc);
                 _context.Expenses.Update(model);
             }
 
