@@ -19,7 +19,7 @@
     <!-- Total Summary Card -->
     <div class="card p-4 mb-4 text-center border-secondary shadow-sm">
         <span class="text-muted text-uppercase fw-semibold small">Total Expenses</span>
-        <h2 class="display-6 fw-bold text-primary mb-0">₦@ViewBag.Expenses</h2>
+        <h2 class="display-6 fw-bold text-primary mb-0">₦@(((decimal)(ViewBag.Expenses ?? 0)).ToString("N0"))</h2>
     </div>
 
     <!-- Expenses Table Card -->
@@ -28,36 +28,38 @@
             <table class="table table-dark table-hover align-middle mb-0">
                 <thead class="border-bottom border-secondary">
                     <tr class="text-secondary small text-uppercase">
-                        <th scope="col" class="ps-4">Id</th>
+                        <th scope="col" class="ps-4">#</th>
                         <th scope="col">Value</th>
                         <th scope="col">Description</th>
-                        <th scope="col">Date & Time</th> <!-- ADDED DATE HEADER -->
+                        <th scope="col">Date & Time</th>
                         <th scope="col" class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (Model != null && Model.Any())
                     {
+                        int rowNumber = 1; // 👈 COUNTER STARTS AT 1 FOR EVERY USER
+
                         foreach (var expense in Model)
                         {
                             <tr>
-                                <td class="ps-4 text-muted fw-semibold">#@expense.Id</td>
-                                <td class="fw-bold text-light">₦@expense.Value</td>
+                                <!-- DISPLAY SEQUENTIAL NUMBER (#1, #2, #3...) -->
+                                <td class="ps-4 text-muted fw-semibold">#@(rowNumber++)</td>
+
+                                <td class="fw-bold text-light">₦@expense.Value.ToString("N0")</td>
                                 <td>@expense.Description</td>
 
-                                <!-- ADDED EXACT TIMESTAMP CELL -->
                                 <td class="text-secondary small">
                                     @(expense.Date.Year > 2000 ? expense.Date.AddHours(1).ToString("yyyy-MM-dd HH:mm:ss") : "N/A")
                                 </td>
 
                                 <td class="text-end pe-4">
-                                    <!-- Edit Button -->
+                                    <!-- EDIT & DELETE STILL USE REAL DB ID BEHIND THE SCENES -->
                                     <a class="btn btn-sm btn-outline-info me-1 px-3"
                                        asp-action="CreateEditExpense"
                                        asp-route-id="@expense.Id">
                                         Edit
                                     </a>
-                                    <!-- Delete Button -->
                                     <a class="btn btn-sm btn-outline-danger px-3"
                                        asp-action="DeleteExpense"
                                        asp-route-id="@expense.Id"
@@ -71,7 +73,6 @@
                     else
                     {
                         <tr>
-                            <!-- UPDATED COLSPAN TO 5 FOR EMPTY STATE -->
                             <td colspan="5" class="text-center py-4 text-muted">
                                 No expenses found. Click <strong>+ Add New Expense</strong> above to get started.
                             </td>

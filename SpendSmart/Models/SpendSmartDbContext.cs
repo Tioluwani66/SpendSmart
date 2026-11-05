@@ -11,5 +11,7 @@ namespace SpendSmart.Models
         {
             
         }
+
+        public DbSet<User> Users { get; set; }
     }
 }

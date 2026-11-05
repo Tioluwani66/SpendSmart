@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using SpendSmart.Models;
 
@@ -9,32 +10,34 @@ namespace SpendSmart
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddDbContext<SpendSmartDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
+            // 1. ADD COOKIE AUTHENTICATION
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Logout";
+                    options.ExpireTimeSpan = TimeSpan.FromDays(7); // Stay logged in for 7 days
+                });
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
-            // COMMENTED OUT FOR RENDER COMPATIBILITY: 
-            // Render handles SSL/HTTPS at the proxy level. Leaving this on inside 
-            // Docker containers causes "Failed to determine https port" warnings and crashes.
-            // app.UseHttpsRedirection();
-
             app.UseStaticFiles();
-
             app.UseRouting();
 
+            // 2. ENABLE AUTHENTICATION & AUTHORIZATION
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

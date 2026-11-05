@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpendSmart.Models;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace SpendSmart.Controllers
 {
+    [Authorize] // 🔐 LOCK DOWN: Requires user to be logged in
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -15,6 +18,14 @@ namespace SpendSmart.Controllers
             _context = context;
         }
 
+        // Helper method to extract the logged-in User's ID from authentication cookies
+        private int GetUserId()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(userIdClaim ?? "0");
+        }
+
+        [AllowAnonymous] // Public: Anyone can visit the Home page
         public IActionResult Index()
         {
             return View();
@@ -22,7 +33,13 @@ namespace SpendSmart.Controllers
 
         public IActionResult Expenses()
         {
-            var allExpenses = _context.Expenses.OrderBy(x => x.Id).ToList();
+            int userId = GetUserId();
+
+            // ONLY fetch expenses belonging to the currently logged-in user
+            var allExpenses = _context.Expenses
+                .Where(x => x.UserId == userId)
+                .OrderBy(x => x.Id)
+                .ToList();
 
             var totalExpenses = allExpenses.Sum(x => x.Value);
 
@@ -33,14 +50,16 @@ namespace SpendSmart.Controllers
 
         public IActionResult CreateEditExpense(int? id)
         {
+            int userId = GetUserId();
+
             if (id != null)
             {
-                // Editing -> load an expense by id
-                var expenseInDb = _context.Expenses.SingleOrDefault(expense => expense.Id == id);
+                // Editing -> load an expense by id ONLY if it belongs to this user
+                var expenseInDb = _context.Expenses.SingleOrDefault(expense => expense.Id == id && expense.UserId == userId);
                 return View(expenseInDb);
             }
 
-            // FIXED: Use DateTime.UtcNow instead of DateTime.Today so hours/minutes/seconds are preserved
+            // Creating new -> initialize with exact current UTC time
             var newExpense = new Expense
             {
                 Date = DateTime.UtcNow
@@ -51,7 +70,10 @@ namespace SpendSmart.Controllers
 
         public IActionResult DeleteExpense(int id)
         {
-            var expenseInDb = _context.Expenses.SingleOrDefault(expense => expense.Id == id);
+            int userId = GetUserId();
+
+            // Delete ONLY if the expense belongs to this user
+            var expenseInDb = _context.Expenses.SingleOrDefault(expense => expense.Id == id && expense.UserId == userId);
 
             if (expenseInDb != null)
             {
@@ -65,7 +87,9 @@ namespace SpendSmart.Controllers
         [HttpPost]
         public IActionResult CreateEditExpenseForm(Expense model)
         {
-            // SAFETY CHECK: If description is empty or value is 0 or less, reload form instead of crashing
+            int userId = GetUserId();
+
+            // SAFETY CHECK: If description is empty or value is 0 or less, reload form
             if (string.IsNullOrWhiteSpace(model.Description) || model.Value <= 0)
             {
                 return View("CreateEditExpense", model);
@@ -73,13 +97,15 @@ namespace SpendSmart.Controllers
 
             if (model.Id == 0)
             {
-                // FIXED: Automatically stamp the exact current UTC time at the moment of submission
+                // Create: Link the new expense to the logged-in user
+                model.UserId = userId;
                 model.Date = DateTime.UtcNow;
                 _context.Expenses.Add(model);
             }
             else
             {
-                // Edit: Preserve existing date as UTC for PostgreSQL
+                // Edit: Ensure UserId remains linked to this user
+                model.UserId = userId;
                 model.Date = DateTime.SpecifyKind(model.Date, DateTimeKind.Utc);
                 _context.Expenses.Update(model);
             }
@@ -89,6 +115,7 @@ namespace SpendSmart.Controllers
             return RedirectToAction("Expenses");
         }
 
+        [AllowAnonymous] // Public: Anyone can visit the Privacy page
         public IActionResult Privacy()
         {
             return View();

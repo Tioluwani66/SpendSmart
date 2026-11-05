@@ -15,26 +15,59 @@
         <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom border-secondary shadow-sm mb-4 py-3">
             <div class="container position-relative">
 
-                <!-- LEFT SIDE: Navigation Links -->
+                <!-- Mobile Toggle Button -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex">
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
+                    <!-- 1. LEFT SIDE: Navigation Links -->
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Expenses">Expenses</a>
-                        </li>
+
+                        <!-- Show 'Expenses' ONLY if user is logged in -->
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Expenses">Expenses</a>
+                            </li>
+                        }
+
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
+
+                    <!-- 2. RIGHT SIDE: Authentication Links -->
+                    <ul class="navbar-nav ms-auto z-3">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <!-- Logged In State: Show Username & Logout -->
+                            <li class="nav-item d-flex align-items-center me-3">
+                                <span class="text-secondary small">Hello, <strong class="text-light">@User.Identity.Name</strong></span>
+                            </li>
+                            <li class="nav-item d-flex align-items-center">
+                                <a class="btn btn-sm btn-outline-danger" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <!-- Logged Out State: Show Login & Register -->
+                            <li class="nav-item me-2 d-flex align-items-center">
+                                <a class="btn btn-sm btn-outline-light" asp-controller="Account" asp-action="Login">Log In</a>
+                            </li>
+                            <li class="nav-item d-flex align-items-center">
+                                <a class="btn btn-sm btn-primary fw-medium" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                        }
+                    </ul>
                 </div>
 
-                <!-- CENTER: SpendSmart Brand -->
+                <!-- 3. CENTER: SpendSmart Brand Logo -->
                 <a class="navbar-brand fw-bold text-primary position-absolute start-50 translate-middle-x m-0 fs-3 text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">
                     SpendSmart
                 </a>
@@ -43,14 +76,14 @@
         </nav>
     </header>
 
-    <!-- Main Content Area -->
+    <!-- Main Content Area (Flex-grow keeps footer at the bottom) -->
     <div class="container my-4 flex-grow-1">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <!-- FOOTER (Cleaned up without the problematic 'footer' class name) -->
+    <!-- FOOTER -->
     <footer class="border-top border-secondary text-muted bg-dark py-3 mt-auto">
         <div class="container text-center text-md-start">
             &copy; @DateTime.Now.Year - SpendSmart - <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-primary text-decoration-none">Privacy</a>

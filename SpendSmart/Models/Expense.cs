@@ -10,5 +10,8 @@ namespace SpendSmart.Models
         [Required]
         public string? Description { get; set; }
         public DateTime Date { get; set; } = DateTime.Now;
+
+        public int? UserId { get; set; }
+        public User? User { get; set; }
     }
 }
